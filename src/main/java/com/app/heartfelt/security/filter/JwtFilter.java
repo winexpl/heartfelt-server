@@ -19,9 +19,13 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 
 @Component
+@AllArgsConstructor
+@NoArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtService jwtService;
@@ -35,10 +39,12 @@ public class JwtFilter extends OncePerRequestFilter {
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-                final String authorizationHeader = request.getHeader("Authorization");
-
+        
+        String authorizationHeader = request.getHeader("Authorization");
+        System.out.println(authorizationHeader);
         String username = null;
         String jwt = null;
+
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
@@ -59,5 +65,4 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-    
 }

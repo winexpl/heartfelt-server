@@ -15,6 +15,7 @@ import com.app.heartfelt.service.UserService;
 
 import jakarta.annotation.Nullable;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,31 +34,24 @@ public class UserController {
     private UserService userService;
     
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
-        return ResponseEntity.ofNullable(userService.getUserById(id));
+    public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
+        return ResponseEntity.ofNullable(userService.findUserById(id));
     }
 
     @GetMapping
-    public List<UserDTO> getUsers(@RequestParam @Nullable String username) {
-        return userService.getAllByUsername(username);
-    }
-    
-    @PostMapping
-    public ResponseEntity<UserDTO> registration(@RequestBody UserRegistrationDTO userDTO) {
-        UserDTO savedUser = userService.saveUser(userDTO);
-        if(savedUser!=null) {
-            URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedUser.getId())
-                .toUri();
-            return ResponseEntity.created(location).body(savedUser);
-        } else return ResponseEntity.badRequest().body(null);
+    public List<UserDTO> findUsers(@RequestParam @Nullable String username) {
+        if(username==null) return userService.findAllUsers();
+        return userService.findAllByUsername(username);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(@PathVariable UUID id, @RequestBody UserDTO userDTO) {
-        userService.updateUser(id, userDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserDTO userDTO) {
+        return ResponseEntity.ofNullable(userService.updateUser(id, userDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

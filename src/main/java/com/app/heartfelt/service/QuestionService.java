@@ -1,38 +1,58 @@
 package com.app.heartfelt.service;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.app.heartfelt.dto.QuestionDTO;
 import com.app.heartfelt.model.Question;
 import com.app.heartfelt.repository.JpaQuestionRepository;
+import com.app.heartfelt.utils.MappingUtils;
 
 @Service
 public class QuestionService {
     @Autowired
     private JpaQuestionRepository questionRepository;
+    @Autowired
+    private MappingUtils mappingUtils;
+    public List<QuestionDTO> findAllQuestions() {
+        return questionRepository.findAll().stream().map(mappingUtils::convertToDTO).toList();
+    }
 
-    public List<QuestionDTO> getAllQuestions() {
-        return questionRepository.findAll().stream().map(this::convertToDTO).toList();
+    public List<QuestionDTO> findQuestionByUserId(UUID userId) {
+        return questionRepository.findByUserId(userId).stream().map(mappingUtils::convertToDTO).toList();
+    }
+
+    public QuestionDTO findQuestionById(UUID id) {
+        Question question = questionRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        return mappingUtils.convertToDTO(question);
     }
 
     public QuestionDTO ask(QuestionDTO questionDTO) {
-        return convertToDTO(questionRepository.save(convertToEntity(questionDTO)));
+        return mappingUtils.convertToDTO(questionRepository.save(mappingUtils.convertToEntity(questionDTO)));
     }
 
-    private QuestionDTO convertToDTO(Question question) {
-        return QuestionDTO.builder()
-            .profileId(question.getProfileId())
-            .id(question.getId())
-            .text(question.getText()).build();
-    }
+    public QuestionDTO updateQuestion(UUID id, QuestionDTO questionDTO) {
+        Question question = questionRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        
+        Class<?> clazz = QuestionDTO.class;
+        Field[] fields = clazz.getDeclaredFields();
 
-    private Question convertToEntity(QuestionDTO questionDTO) {
-        return Question.builder()
-            .profileId(questionDTO.getProfileId())
-            .id(questionDTO.getId())
-            .text(questionDTO.getText()).build();
+        try {
+            for(Field field : fields) {
+                var value = field.get(questionDTO);
+                if(value != null) field.set(question, value);
+            }
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            throw new HttpClientErrorException(HttpStatus.NOT_IMPLEMENTED);
+        }
+        return mappingUtils.convertToDTO(questionRepository.save(question));
     }
 }

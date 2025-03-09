@@ -14,6 +14,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 
 
 @Service
@@ -24,7 +25,15 @@ public class JwtService {
     @Value("${security.jwt.refresh_token_expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
 
-    Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${secure.jwt.secret_key}")
+    private String keyString;
+
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(keyString.getBytes());
+    }
 
     public String generateAccessToken(User user) {
         return generateToken(user, ACCESS_TOKEN_EXPIRATION);
@@ -41,6 +50,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .setClaims(claims)
+                .setAudience("string")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration*1000))
                 .signWith(key, SignatureAlgorithm.HS256)

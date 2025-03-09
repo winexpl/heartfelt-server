@@ -13,6 +13,8 @@ import com.app.heartfelt.model.User;
 public interface JpaUserRepository extends JpaRepository<User, UUID> {
     List<User> findAll();
 
+    boolean existsByUsername(String username);
+
     Optional<User> findByUsername(String username);
 
     @Query(nativeQuery = true)

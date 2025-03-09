@@ -1,5 +1,6 @@
 package com.app.heartfelt.model;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -25,9 +26,12 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "q_p_id", nullable = false)
-    private UUID profileId;
+    @Column(name = "q_u_id", nullable = false)
+    private UUID userId;
 
     @Column(name = "q_text", nullable = false)
     private String text;
+
+    @Column(name = "q_created_at")
+    private ZonedDateTime createdAt;
 }

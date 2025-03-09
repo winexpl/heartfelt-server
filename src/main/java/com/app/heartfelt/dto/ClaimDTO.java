@@ -12,8 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionDTO {
+public class ClaimDTO {
     private UUID id;
+    private UUID senderId;
     private UUID userId;
     private String text;
     private ZonedDateTime createdAt;

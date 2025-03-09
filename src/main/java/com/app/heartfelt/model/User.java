@@ -1,7 +1,6 @@
 package com.app.heartfelt.model;
 
-import java.sql.Timestamp;
-import java.util.Collection;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,8 +13,6 @@ import com.app.heartfelt.utils.RoleListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -60,7 +57,7 @@ public class User implements UserDetails {
     private List<Role> role;
 
     @Column(name = "u_created_at")
-    private Timestamp time;
+    private ZonedDateTime createdAt;
 
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {

@@ -1,5 +1,6 @@
 package com.app.heartfelt.service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,74 +15,56 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.app.heartfelt.repository.JpaUserRepository;
+import com.app.heartfelt.utils.MappingUtils;
+import com.app.heartfelt.dto.QuestionDTO;
 import com.app.heartfelt.dto.UserDTO;
-import com.app.heartfelt.dto.UserLoginDTO;
-import com.app.heartfelt.dto.UserRegistrationDTO;
+import com.app.heartfelt.model.Question;
 import com.app.heartfelt.model.User;
 
 @Service
 public class UserService implements UserDetailsService {
     @Autowired
     private JpaUserRepository userRepository;
+    @Autowired
+    private MappingUtils mappingUtils;
 
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(this::convertToDTO).toList();
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
-    public UserDTO getUserById(UUID id) {
+    public List<UserDTO> findAllUsers() {
+        return userRepository.findAll().stream().map(mappingUtils::convertToDTO).toList();
+    }
+
+    public UserDTO findUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()) return convertToDTO(userOptional.get());
+        if(userOptional.isPresent()) return mappingUtils.convertToDTO(userOptional.get());
         else return null;
     }
 
-    public UserDTO saveUser(UserRegistrationDTO userDTO) {
-        User user = convertToEntity(userDTO);
+    public List<UserDTO> findAllByUsername(String username) {
+        return userRepository.findAllByUsername(username).stream().map(mappingUtils::convertToDTO).toList();
+    }
+
+    public UserDTO updateUser(UUID id, UserDTO userDTO) {
+        User user = userRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        
+        Class<?> clazz = UserDTO.class;
+        Field[] fields = clazz.getDeclaredFields();
+
         try {
-            return convertToDTO(userRepository.save(user));
-        } catch(DataIntegrityViolationException e) {
-            return null;
+            for(Field field : fields) {
+                var value = field.get(userDTO);
+                if(value != null) field.set(user, value);
+            }
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            throw new HttpClientErrorException(HttpStatus.NOT_IMPLEMENTED);
         }
+        return mappingUtils.convertToDTO(userRepository.save(user));
     }
-
-    public List<UserDTO> getAllByUsername(String username) {
-        if(username == null) return userRepository.findAll().stream().map(this::convertToDTO).toList();
-        else return userRepository.findAllByUsername(username).stream().map(this::convertToDTO).toList();
-    }
-
-    public void updateUser(UUID id, UserDTO userDTO) {
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        if(userDTO.getNickname() != null) existingUser.setNickname(userDTO.getNickname());
-        userRepository.save(existingUser);
-    }
-
-    private UserDTO convertToDTO(User user) {
-        return UserDTO.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .nickname(user.getNickname())
-            .role(user.getRole()).build();
-    }
-
-    private User convertToEntity(UserDTO userDTO) {
-        return User.builder()
-            .id(userDTO.getId())
-            .nickname(userDTO.getNickname())
-            .role(userDTO.getRole())
-            .username(userDTO.getUsername()).build();
-    }
-
-    private User convertToEntity(UserLoginDTO userLoginDTO) {
-        return User.builder()
-            .username(userLoginDTO.getUsername())
-            .password(userLoginDTO.getPassword()).build();
-    }
-
-    private User convertToEntity(UserRegistrationDTO userRegistrationDTO) {
-        return User.builder()
-            .username(userRegistrationDTO.getUsername())
-            .nickname(userRegistrationDTO.getNickname())
-            .password(userRegistrationDTO.getPassword())
-            .role(userRegistrationDTO.getRole()).build();
+    
+    public void deleteUser(UUID id) {
+        userRepository.deleteById(id);
     }
 
     @Override

@@ -17,24 +17,24 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name  =  "answers",  schema  =  "public")
-public class Answer {
+@NoArgsConstructor
+@Table(name  =  "reviews",  schema  =  "public")
+public class Review {
     @Id
-    @Column(name = "a_id", nullable = false)
+    @Column(name = "r_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "a_q_id", nullable = false)
-    private UUID questionId;
+    @Column(name = "r_sender_id", nullable = false)
+    private UUID senderId;
 
-    @Column(name = "a_p_id", nullable = false)
-    private UUID psychologistId;
+    @Column(name = "r_user_id")
+    private UUID userId;
 
-    @Column(name = "a_text", nullable = false)
+    @Column(name = "r_text")
     private String text;
 
-    @Column(name = "a_created_at")
+    @Column(name = "r_created_at")
     private ZonedDateTime createdAt;
 }

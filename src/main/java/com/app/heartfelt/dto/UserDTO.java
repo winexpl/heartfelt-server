@@ -1,5 +1,6 @@
 package com.app.heartfelt.dto;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,4 +20,5 @@ public class UserDTO {
     private String username;
     private String nickname;
     private List<Role> role;
+    private ZonedDateTime createdAt;
 }
