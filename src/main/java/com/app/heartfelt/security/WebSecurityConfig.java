@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
+
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
     @Autowired

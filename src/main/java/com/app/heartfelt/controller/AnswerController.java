@@ -64,6 +64,4 @@ public class AnswerController {
     public ResponseEntity<AnswerDTO> findAnswerById(@PathVariable UUID id) {
         return ResponseEntity.ok(answerService.findAnswerById(id));
     }
-
-
 }
