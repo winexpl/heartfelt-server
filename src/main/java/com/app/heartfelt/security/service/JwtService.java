@@ -45,6 +45,7 @@ public class JwtService {
 
     private String generateToken(User user, long tokenExpiration) {
         Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("id", user.getId());
         claims.put("roles", user.getAuthorities());
         claims.put("type", "access");
 
@@ -52,7 +53,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setAudience("string")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration*1000))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration * 1000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -63,6 +64,7 @@ public class JwtService {
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = extractAllClaims(token);
+        System.out.println(claims.toString());
         return resolver.apply(claims);
     }
 

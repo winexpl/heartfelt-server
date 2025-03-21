@@ -1,16 +1,17 @@
 package com.app.heartfelt.service;
 
-import javax.security.sasl.AuthenticationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.app.heartfelt.dto.TokenDTO;
@@ -56,26 +57,24 @@ public class AuthService {
         );
 
         User user = userRepository.findByUsername(userLoginDTO.getUsername()).orElseThrow();
-
+        System.out.println(user.toString());
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return new TokenDTO(accessToken, refreshToken);
     }
 
-    public TokenDTO refreshToken(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new AuthenticationException("No JWT token");
-        }
-        String token = authorizationHeader.substring(7);
-        String username = jwtService.extractUsername(token);
+    public TokenDTO refreshToken(String refreshToken, HttpServletResponse response) throws AuthenticationException {
+        if (refreshToken == null) {
+            throw new BadCredentialsException("No refresh token");
+        };
+        String username = jwtService.extractUsername(refreshToken);
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("No user found"));
-        if (jwtService.validate(token)) {
+        if (jwtService.validate(refreshToken)) {
             String accessToken = jwtService.generateAccessToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
-            return new TokenDTO(accessToken, refreshToken);
+            String newRefreshToken = jwtService.generateRefreshToken(user);
+            return new TokenDTO(accessToken, newRefreshToken);
         }
         return null;
     }

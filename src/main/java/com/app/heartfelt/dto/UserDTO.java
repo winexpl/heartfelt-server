@@ -20,5 +20,6 @@ public class UserDTO {
     private String username;
     private String nickname;
     private List<Role> role;
+    private String about;
     private ZonedDateTime createdAt;
 }

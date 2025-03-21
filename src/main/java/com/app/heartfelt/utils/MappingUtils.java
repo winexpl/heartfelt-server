@@ -21,6 +21,7 @@ public class MappingUtils {
     public UserDTO convertToDTO(User user) {
         return UserDTO.builder()
             .id(user.getId())
+            .about(user.getAbout())
             .username(user.getUsername())
             .nickname(user.getNickname())
             .createdAt(user.getCreatedAt())
@@ -64,6 +65,7 @@ public class MappingUtils {
 
     public User convertToEntity(UserDTO userDTO) {
         return User.builder()
+            .about(userDTO.getAbout())
             .id(userDTO.getId())
             .nickname(userDTO.getNickname())
             .role(userDTO.getRole())

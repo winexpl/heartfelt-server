@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.app.heartfelt.security.service.JwtService;
+import com.app.heartfelt.service.UserService;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtService jwtService;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(
@@ -39,21 +41,22 @@ public class JwtFilter extends OncePerRequestFilter {
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        
         String authorizationHeader = request.getHeader("Authorization");
-        System.out.println(authorizationHeader);
+        System.out.println("authorizationHeader " + authorizationHeader);
+        System.out.println(request.getMethod());
+        System.out.println(request.getRequestURI());
         String username = null;
         String jwt = null;
-
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             username = jwtService.extractUsername(jwt);
+            System.out.println(username);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = this.userService.loadUserByUsername(username);
 
             if (jwtService.validate(jwt)) {
 

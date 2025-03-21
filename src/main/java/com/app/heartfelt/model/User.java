@@ -4,7 +4,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.app.heartfelt.security.Role;
@@ -55,6 +57,9 @@ public class User implements UserDetails {
     @Convert(converter = RoleListConverter.class)
     @Column(name = "u_roles")
     private List<Role> role;
+
+    @Column(name = "u_about")
+    private String about;
 
     @Column(name = "u_created_at")
     private ZonedDateTime createdAt;
