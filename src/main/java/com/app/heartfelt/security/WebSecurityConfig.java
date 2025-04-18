@@ -8,59 +8,47 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.app.heartfelt.security.filter.JwtFilter;
-import com.app.heartfelt.security.handler.CustomAccessDeniedHandler;
-import com.app.heartfelt.security.handler.CustomLogoutHandler;
-import com.app.heartfelt.security.service.JwtService;
-import com.app.heartfelt.service.UserService;
+import com.app.heartfelt.security.filters.JwtFilter;
+import com.app.heartfelt.services.UserService;
 
 import lombok.AllArgsConstructor;
 
-import javax.naming.AuthenticationException;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
-
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
-    @Autowired
     private final UserService userService;
-    @Autowired
-    private final CustomLogoutHandler logoutHandler;
-    @Autowired
     private final JwtFilter jwtFilter;
-
     @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
-        http
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.requiresChannel(channel -> channel
+                .anyRequest()
+                .requiresSecure())
             .csrf(csrf -> csrf.disable()) // отключение защиты от csrf
             .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/", "/login/**", "/registration/**").permitAll()
+                .requestMatchers("/", "/login", "/refresh_token", "/registration", "/ws/**", "/ws").permitAll()
+                .requestMatchers("https://localhost:8443/*.js").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .userDetailsService(userService)
             .logout(log -> {
                 log.logoutUrl("/logout");
-                log.addLogoutHandler(logoutHandler);})
-            .exceptionHandling(exceptionHandling -> exceptionHandling.accessDeniedHandler(accessDeniedHandler))
+            })
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())); // Подключение CORS-настройки
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
     }
 
@@ -71,7 +59,7 @@ public class WebSecurityConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
-
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

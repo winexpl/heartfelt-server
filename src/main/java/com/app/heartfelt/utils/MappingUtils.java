@@ -2,18 +2,25 @@ package com.app.heartfelt.utils;
 
 import org.springframework.stereotype.Component;
 
-import com.app.heartfelt.dto.AnswerDTO;
-import com.app.heartfelt.dto.ClaimDTO;
-import com.app.heartfelt.dto.QuestionDTO;
-import com.app.heartfelt.dto.ReviewDTO;
-import com.app.heartfelt.dto.UserDTO;
-import com.app.heartfelt.dto.UserLoginDTO;
-import com.app.heartfelt.dto.UserRegistrationDTO;
-import com.app.heartfelt.model.Answer;
-import com.app.heartfelt.model.Claim;
-import com.app.heartfelt.model.Question;
-import com.app.heartfelt.model.Review;
-import com.app.heartfelt.model.User;
+import com.app.heartfelt.dtos.AnswerDTO;
+import com.app.heartfelt.dtos.ClaimDTO;
+import com.app.heartfelt.dtos.QuestionDTO;
+import com.app.heartfelt.dtos.RequestDTO;
+import com.app.heartfelt.dtos.ReviewDTO;
+import com.app.heartfelt.dtos.UserDTO;
+import com.app.heartfelt.dtos.UserLoginDTO;
+import com.app.heartfelt.dtos.UserRegistrationDTO;
+import com.app.heartfelt.models.AnswerWithUsernameAndNickname;
+import com.app.heartfelt.models.ClaimWithSenderUsernameAndUserUsername;
+import com.app.heartfelt.models.QuestionWithSenderUsernameAndUserUsername;
+import com.app.heartfelt.models.RequestWithUsernameAndNickname;
+import com.app.heartfelt.models.ReviewWithSenderUsernameAndReceiverUsername;
+import com.app.heartfelt.models.entities.Answer;
+import com.app.heartfelt.models.entities.Claim;
+import com.app.heartfelt.models.entities.Question;
+import com.app.heartfelt.models.entities.Request;
+import com.app.heartfelt.models.entities.Review;
+import com.app.heartfelt.models.entities.User;
 
 @Component
 public class MappingUtils {
@@ -33,7 +40,21 @@ public class MappingUtils {
             .userId(question.getUserId())
             .id(question.getId())
             .text(question.getText())
+            .anonymous(question.isAnonymous())
+            .title(question.getTitle())
             .createdAt(question.getCreatedAt()).build();
+    }
+
+    public QuestionDTO convertToDTO(QuestionWithSenderUsernameAndUserUsername question) {
+        return QuestionDTO.builder()
+            .userId(question.getUserId())
+            .id(question.getId())
+            .text(question.getText())
+            .anonymous(question.isAnonymous())
+            .title(question.getTitle())
+            .createdAt(question.getCreatedAt())
+            .username(question.getUsername())
+            .nickname(question.getNickname()).build();
     }
 
     public AnswerDTO convertToDTO(Answer answer) {
@@ -45,20 +66,60 @@ public class MappingUtils {
             .createdAt(answer.getCreatedAt()).build();
     }
 
+    public AnswerDTO convertToDTO(AnswerWithUsernameAndNickname answer) {
+        return AnswerDTO.builder()
+            .id(answer.getId())
+            .questionId(answer.getQuestionId())
+            .psychologistId(answer.getPsychologistId())
+            .text(answer.getText())
+            .nickname(answer.getNickname())
+            .username(answer.getUsername())
+            .createdAt(answer.getCreatedAt()).build();
+    }
+
     public ClaimDTO convertToDTO(Claim claim) {
         return ClaimDTO.builder()
             .id(claim.getId())
             .senderId(claim.getSenderId())
-            .userId(claim.getUserId())
+            .receiverId(claim.getReceiverId())
+            .claimType(claim.getClaimType())
+            .answerId(claim.getAnswerId())
+            .questionId(claim.getQuestionId())
             .text(claim.getText())
             .createdAt(claim.getCreatedAt()).build();
+    }
+
+    public ClaimDTO convertToDTO(ClaimWithSenderUsernameAndUserUsername claim) {
+        return ClaimDTO.builder()
+            .id(claim.getId())
+            .senderId(claim.getSenderId())
+            .receiverId(claim.getReceiverId())
+            .claimType(claim.getClaimType())
+            .answerId(claim.getAnswerId())
+            .questionId(claim.getQuestionId())
+            .text(claim.getText())
+            .senderUsername(claim.getSenderUsername())
+            .receiverUsername(claim.getReceiverUsername())
+            .createdAt(claim.getCreatedAt()).build();
+    }
+
+    public ReviewDTO convertToDTO(ReviewWithSenderUsernameAndReceiverUsername review) {
+        return ReviewDTO.builder()
+            .id(review.getId())
+            .senderId(review.getSenderId())
+            .receiverId(review.getReceiverId())
+            .text(review.getText())
+            .createdAt(review.getCreatedAt())
+            .senderUsername(review.getSenderUsername())
+            .receiverUsername(review.getReceiverUsername())
+            .build();
     }
 
     public ReviewDTO convertToDTO(Review review) {
         return ReviewDTO.builder()
             .id(review.getId())
             .senderId(review.getSenderId())
-            .userId(review.getUserId())
+            .receiverId(review.getReceiverId())
             .text(review.getText())
             .createdAt(review.getCreatedAt()).build();
     }
@@ -91,8 +152,11 @@ public class MappingUtils {
         return Claim.builder()
             .id(claimDTO.getId())
             .senderId(claimDTO.getSenderId())
-            .userId(claimDTO.getUserId())
+            .receiverId(claimDTO.getReceiverId())
+            .questionId(claimDTO.getQuestionId())
+            .answerId(claimDTO.getAnswerId())
             .text(claimDTO.getText())
+            .claimType(claimDTO.getClaimType())
             .createdAt(claimDTO.getCreatedAt()).build();
     }
 
@@ -110,15 +174,44 @@ public class MappingUtils {
             .id(questionDTO.getId())
             .userId(questionDTO.getUserId())
             .text(questionDTO.getText())
-            .createdAt(questionDTO.getCreatedAt()).build();
+            .createdAt(questionDTO.getCreatedAt())
+            .anonymous(questionDTO.isAnonymous())
+            .title(questionDTO.getTitle())
+            .build();
     }
 
     public Review convertToEntity(ReviewDTO reviewDTO) {
         return Review.builder()
             .id(reviewDTO.getId())
             .senderId(reviewDTO.getSenderId())
-            .userId(reviewDTO.getUserId())
+            .receiverId(reviewDTO.getReceiverId())
             .text(reviewDTO.getText())
             .createdAt(reviewDTO.getCreatedAt()).build();
+    }
+
+    public Request convertToEntity(RequestDTO requestDTO) {
+        return Request.builder()
+            .id(requestDTO.getId())
+            .userId(requestDTO.getUserId())
+            .text(requestDTO.getText())
+            .createdAt(requestDTO.getCreatedAt()).build();
+    }
+
+    public RequestDTO convertToDTO(Request request) {
+        return RequestDTO.builder()
+            .id(request.getId())
+            .userId(request.getUserId())
+            .text(request.getText())
+            .createdAt(request.getCreatedAt()).build();
+    }
+
+    public RequestDTO convertToDTO(RequestWithUsernameAndNickname request) {
+        return RequestDTO.builder()
+            .id(request.getId())
+            .userId(request.getUserId())
+            .text(request.getText())
+            .username(request.getUsername())
+            .nickname(request.getNickname())
+            .createdAt(request.getCreatedAt()).build();
     }
 }
