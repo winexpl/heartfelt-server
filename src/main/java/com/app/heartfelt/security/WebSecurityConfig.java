@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
+    
     private final UserService userService;
     private final JwtFilter jwtFilter;
     @Bean
