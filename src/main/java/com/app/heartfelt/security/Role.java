@@ -7,6 +7,7 @@ public enum Role implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return toString();
+        StringBuilder b = new StringBuilder();
+        return  b.append("ROLE_").append(toString()).toString();
     }
 }
