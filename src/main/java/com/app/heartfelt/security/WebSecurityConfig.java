@@ -20,36 +20,33 @@ import com.app.heartfelt.services.UserService;
 
 import lombok.AllArgsConstructor;
 
-
-
-
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
-    
+
     private final UserService userService;
     private final JwtFilter jwtFilter;
+
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.requiresChannel(channel -> channel
                 .anyRequest()
                 .requiresSecure())
-            .csrf(csrf -> csrf.disable()) // отключение защиты от csrf
-            .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/", "/login", "/refresh_token", "/registration", "/ws/**", "/ws").permitAll()
-                .requestMatchers("https://localhost:8443/*.js").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .userDetailsService(userService)
-            .logout(log -> {
-                log.logoutUrl("/logout");
-            })
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                .csrf(csrf -> csrf.disable()) // отключение защиты от csrf
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/", "/login", "/refresh_token", "/registration", "/ws/**", "/ws").permitAll()
+                        .requestMatchers("https://localhost:8443/*.js").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .userDetailsService(userService)
+                .logout(log -> {
+                    log.logoutUrl("/logout");
+                })
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
     }
 
@@ -60,7 +57,7 @@ public class WebSecurityConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
@@ -73,9 +70,10 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManagerBuilder authenticationManagerBuilder = http
+                .getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userService)
-            .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder.build();
     }
 }

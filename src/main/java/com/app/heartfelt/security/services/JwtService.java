@@ -15,7 +15,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 
-
 @Service
 public class JwtService {
     @Value("${security.jwt.access_token_expiration}")
@@ -58,7 +57,8 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).requireAudience("string").build().parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder().setSigningKey(key).requireAudience("string").build().parseClaimsJws(token)
+                .getBody();
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {

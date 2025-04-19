@@ -1,6 +1,5 @@
 package com.app.heartfelt.services;
 
-import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,26 +40,29 @@ public class ReviewService {
     }
 
     public List<ReviewDTO> findReviewByReceiverId(UUID receiverId) {
-        return reviewRepository.findAllWithSenderUsernameAndReceiverUsernameByReceiverId(receiverId).stream().map(mappingUtils::convertToDTO).toList();
+        return reviewRepository.findAllWithSenderUsernameAndReceiverUsernameByReceiverId(receiverId).stream()
+                .map(mappingUtils::convertToDTO).toList();
     }
 
     public ReviewDTO findReviewById(UUID id) {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
         return mappingUtils.convertToDTO(review);
     }
 
     public ReviewDTO updateReview(UUID id, ReviewDTO reviewDTO) {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
         review.setText(reviewDTO.getText());
-        
+
         return mappingUtils.convertToDTO(reviewRepository.save(review));
     }
 
     public ReviewDTO saveReview(ReviewDTO reviewDTO) {
         User receiver;
 
-        if(reviewDTO.getReceiverUsername() != null && reviewDTO.getReceiverId() == null) {
+        if (reviewDTO.getReceiverUsername() != null && reviewDTO.getReceiverId() == null) {
             receiver = userService.loadUserByUsername(reviewDTO.getReceiverUsername());
             reviewDTO.setReceiverId(receiver.getId());
         }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,11 +16,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
-import com.app.heartfelt.utils.MappingUtils;
 import com.app.heartfelt.dtos.UserDTO;
 import com.app.heartfelt.models.entities.User;
 import com.app.heartfelt.repositories.JpaUserRepository;
 import com.app.heartfelt.security.Role;
+import com.app.heartfelt.utils.MappingUtils;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -35,7 +34,7 @@ public class UserService implements UserDetailsService {
         user.setRole(Arrays.asList(newRole));
         return mappingUtils.convertToDTO(userRepository.save(user));
     }
-    
+
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
@@ -46,8 +45,10 @@ public class UserService implements UserDetailsService {
 
     public UserDTO findUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()) return mappingUtils.convertToDTO(userOptional.get());
-        else return null;
+        if (userOptional.isPresent())
+            return mappingUtils.convertToDTO(userOptional.get());
+        else
+            return null;
     }
 
     public UserDTO findUserByUsername(String username) {
@@ -60,14 +61,14 @@ public class UserService implements UserDetailsService {
 
     public UserDTO updateUser(UUID id, UserDTO userDTO) {
         User user = userRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        
+
         updateField(userDTO.getUsername(), user::setUsername);
         updateField(userDTO.getNickname(), user::setNickname);
         updateField(userDTO.getAbout(), user::setAbout);
-        
+
         return mappingUtils.convertToDTO(userRepository.save(user));
     }
-    
+
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
@@ -85,7 +86,7 @@ public class UserService implements UserDetailsService {
     public User getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()
-            && authentication.getPrincipal() instanceof User) {
+                && authentication.getPrincipal() instanceof User) {
             return (User) authentication.getPrincipal();
         }
         return null;
