@@ -56,9 +56,10 @@ public class AnswerService {
         Answer answer = answerRepository.findById(id)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
         User currentUser = userService.getCurrentUserDetails();
-        if (currentUser.getId() != answer.getPsychologistId() || currentUser.getAuthorities().contains(Role.ADMIN))
-            throw new SecurityException();
-        answerRepository.deleteById(id);
+        if (currentUser.getId().equals(answer.getPsychologistId()) || currentUser.getAuthorities().contains(Role.ADMIN)) {
+            answerRepository.deleteById(id);
+
+        } else throw new SecurityException();
     }
 
     public AnswerDTO updateAnswer(UUID id, AnswerDTO answerDTO) {

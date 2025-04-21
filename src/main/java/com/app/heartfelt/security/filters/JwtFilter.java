@@ -60,8 +60,10 @@ public class JwtFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+                log.info("Validate JWT: {}", jwt);
+            } else log.info("Not validate JWT: {}", jwt);
         }
         filterChain.doFilter(request, response);
+        log.info("Response status: {}", response.getStatus());
     }
 }

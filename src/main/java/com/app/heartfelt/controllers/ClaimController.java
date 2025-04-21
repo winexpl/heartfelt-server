@@ -23,7 +23,6 @@ import com.app.heartfelt.dtos.ClaimDTO;
 import com.app.heartfelt.services.ClaimService;
 
 import jakarta.annotation.Nullable;
-import jakarta.annotation.security.RolesAllowed;
 
 
 
@@ -68,7 +67,6 @@ public class ClaimController {
         }
     }
     
-    @RolesAllowed("ADMIN")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClaim(@PathVariable UUID id) {
         claimService.deleteClaim(id);

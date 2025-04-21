@@ -37,6 +37,10 @@ public class QuestionService {
                 .findByUserId(userId, Sort.by(Sort.Direction.DESC, "createdAt"))
                 .stream().map(mappingUtils::convertToDTO).toList();
         UserDTO user = userService.findUserById(userId);
+        User currentUser = userService.getCurrentUserDetails();
+        if(!currentUser.getId().equals(user.getId())) {
+            questionDTO = questionDTO.stream().filter(q -> !q.isAnonymous()).toList();
+        }
         questionDTO.stream().map(dto -> {
             dto.setUsername(user.getUsername());
             dto.setNickname(user.getNickname());
